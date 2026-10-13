@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>우리의 PostSecret</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&family=Gaegu:wght@400;700&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --wall:#DCE3E8; --wall-2:#cfd8df; --ink:#1E2A38; --ink-soft:#4a5868;
+  --kraft:#C9A87C; --paper:#FBF8F2; --stamp:#B23A48; --post:#3B5B8C;
+  --line:rgba(30,42,56,.18); --shadow:0 1px 2px rgba(30,42,56,.18),0 8px 18px -8px rgba(30,42,56,.35);
+  --serif:"Gowun Batang","Noto Serif KR","AppleMyungjo",serif;
+  --sans:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --wall:#18212b; --wall-2:#1f2a36; --ink:#e8ecf0; --ink-soft:#a7b3bf;
+    --paper:#24303c; --line:rgba(232,236,240,.16);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 22px -8px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --wall:#18212b; --wall-2:#1f2a36; --ink:#e8ecf0; --ink-soft:#a7b3bf;
+  --paper:#24303c; --line:rgba(232,236,240,.16);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 22px -8px rgba(0,0,0,.6);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--wall);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.7;
+  background-image:radial-gradient(var(--wall-2) 1px,transparent 1px);background-size:22px 22px}
+img{max-width:100%}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--post);outline-offset:2px}
+
+/* header */
+header{padding:56px 0 28px}
+.title{font-family:var(--serif);font-weight:700;font-size:clamp(2rem,5.4vw,3.4rem);line-height:1.2;margin:0 0 14px;letter-spacing:-.01em}
+.lede{max-width:38em;color:var(--ink-soft);margin:0}
+.verse{margin:26px 0 0;max-width:34em;font-family:var(--serif);border-left:3px solid var(--stamp);padding:2px 0 2px 16px}
+.verse small{display:block;color:var(--ink-soft);font-family:var(--sans);font-size:.85rem;margin-top:4px}
+
+/* composer */
+.compose{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:start;padding:28px 0 56px;border-bottom:1px dashed var(--line)}
+@media (max-width:820px){.compose{grid-template-columns:1fr;gap:28px}}
+h2{font-family:var(--serif);font-size:1.5rem;margin:0 0 10px;line-height:1.3}
+.rules{margin:0 0 22px;padding-left:1.3em;color:var(--ink-soft)}
+.rules li{margin:2px 0}
+label.f{display:block;font-weight:700;font-size:.95rem;margin:18px 0 8px}
+textarea{width:100%;min-height:130px;resize:vertical;padding:14px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);line-height:1.6}
+.count{text-align:right;font-size:.85rem;color:var(--ink-soft);margin-top:4px}
+.swatches,.chips{display:flex;flex-wrap:wrap;gap:8px}
+.sw{width:44px;height:44px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.sw[aria-pressed="true"]{border-color:var(--ink);transform:scale(1.08)}
+.chip{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px;cursor:pointer;min-height:40px}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--wall)}
+.chip.emo{font-size:1.25rem;padding:4px 10px;min-width:44px}
+.send{margin-top:26px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn{background:var(--stamp);color:#fff;border:0;border-radius:6px;padding:12px 22px;font-weight:700;cursor:pointer;font-size:1rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:.88rem;color:var(--ink-soft)}
+.status{font-size:.95rem;min-height:1.5em}
+.status.err{color:var(--stamp)}
+.anon{display:flex;gap:10px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin-top:20px;font-size:.9rem;color:var(--ink-soft)}
+
+.preview-wrap{position:sticky;top:calc(20px + env(safe-area-inset-top,0px))}
+.preview-label{font-size:.9rem;color:var(--ink-soft);margin-bottom:10px}
+
+/* postcard */
+.card{position:relative;aspect-ratio:3/2;border-radius:3px;box-shadow:var(--shadow);overflow:hidden;display:flex;align-items:center;justify-content:center;padding:9% 10%;text-align:center;word-break:keep-all;overflow-wrap:anywhere}
+.card .txt{white-space:pre-wrap;line-height:1.35;position:relative;z-index:1}
+.card .stk{position:absolute;right:6%;top:7%;font-size:1.9em;z-index:1;line-height:1}
+.card .stk:empty{display:none}
+.preview .card{transform:rotate(-1.6deg);font-size:clamp(1rem,2.6vw,1.45rem)}
+.f-pen .txt{font-family:"Nanum Pen Script",cursive;font-size:1.65em}
+.f-gaegu .txt{font-family:"Gaegu",cursive;font-size:1.25em;font-weight:700}
+.f-serif .txt{font-family:var(--serif);font-size:1.05em}
+.f-block .txt{font-family:"Black Han Sans",var(--sans);font-size:1.3em;letter-spacing:.01em}
+.bg-kraft{background:#C9A87C;color:#2b1f12;background-image:radial-gradient(rgba(80,50,20,.12) 1px,transparent 1.5px);background-size:7px 7px}
+.bg-night{background:#1d2b4a;color:#f3efe2;background-image:radial-gradient(#fff 1px,transparent 1.5px),radial-gradient(rgba(255,255,255,.6) 1px,transparent 1.5px);background-size:61px 53px,37px 41px;background-position:0 0,18px 22px}
+.bg-lined{background:#fbf8f2;color:#1E2A38;background-image:linear-gradient(transparent 27px,rgba(59,91,140,.22) 28px);background-size:100% 28px}
+.bg-sky{background:linear-gradient(160deg,#bfd9ea,#f4e3d3);color:#1E2A38}
+.bg-red{background:#B23A48;color:#fff6ef}
+.bg-leaf{background:#5d7a5b;color:#f4f1e6;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 8px,transparent 8px 16px)}
+.bg-ink{background:#2a2f36;color:#efe9dc}
+.placeholder{opacity:.55}
+
+/* wall */
+.wall-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:48px 0 22px}
+.wall-head p{margin:0;color:var(--ink-soft)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.grid{columns:3 300px;column-gap:26px;padding-bottom:40px}
+.item{break-inside:avoid;margin:0 0 30px;display:block}
+.item .card{font-size:1rem;cursor:zoom-in;transition:transform .2s}
+.item .card:hover{transform:rotate(0) scale(1.01)!important}
+.meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;font-size:.85rem;color:var(--ink-soft);flex-wrap:wrap}
+.reacts{display:flex;gap:6px}
+.react{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:.88rem;min-height:36px}
+.react[aria-pressed="true"]{border-color:var(--post);color:var(--post);font-weight:700}
+.link{background:none;border:0;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-size:.82rem;padding:4px}
+.empty{border:2px dashed var(--line);border-radius:6px;padding:48px 20px;text-align:center;color:var(--ink-soft)}
+
+/* lightbox */
+.lb{position:fixed;inset:0;background:rgba(15,20,28,.88);display:none;align-items:center;justify-content:center;z-index:50;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px))}
+.lb.open{display:flex}
+.lb .card{width:min(92vw,880px);font-size:clamp(1.1rem,3vw,2rem);transform:none}
+.lb-nav{position:absolute;left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:12px}
+.lb-nav button{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:10px 18px;cursor:pointer;min-height:44px}
+.lb-count{position:absolute;top:calc(18px + env(safe-area-inset-top,0px));left:0;right:0;text-align:center;color:rgba(255,255,255,.75);font-size:.9rem}
+
+footer{border-top:1px dashed var(--line);padding:36px 0 56px;color:var(--ink-soft);font-size:.92rem}
+footer .verse{margin-top:0;color:var(--ink)}
+.help{margin-top:22px}
+.help strong{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="title">당신의 비밀만큼<br>당신은 아픕니다</h1>
+    <p class="lede">프랭크 워렌의 PostSecret처럼, 아무에게도 말하지 못한 비밀 하나를 엽서에 적어 이 벽에 붙여 보세요. 로그인도, 이름도 필요 없습니다. 누구나 숨기고 싶은 비밀이 있고, 그걸 꺼내 놓을 때 우리는 혼자가 아니라는 걸 알게 됩니다.</p>
+    <p class="verse">하나님 앞에는 아무 피조물도 숨겨진 것이 없고, 모든 것이 그의 눈 앞에 드러나 있습니다.<small>히브리서 4:13 (새번역)</small></p>
+  </header>
+
+  <section class="compose" aria-labelledby="c-h">
+    <div>
+      <h2 id="c-h">엽서 쓰기</h2>
+      <ol class="rules">
+        <li>비밀은 간단하고 간략하게 적어 주세요.</li>
+        <li>글씨는 충분히 읽기 쉽게.</li>
+        <li>엽서를 캔버스라 생각하고, 마음껏 꾸며 보세요.</li>
+      </ol>
+
+      <label class="f" for="txt">나의 비밀</label>
+      <textarea id="txt" maxlength="180" placeholder="사실 나는…"></textarea>
+      <div class="count"><span id="cnt">0</span> / 180</div>
+
+      <div class="f" id="bg-l" style="font-weight:700;font-size:.95rem;margin:18px 0 8px">엽서 바탕</div>
+      <div class="swatches" role="group" aria-labelledby="bg-l" id="bgs"></div>
+
+      <div class="f" id="ft-l" style="font-weight:700;font-size:.95rem;margin:18px 0 8px">글씨체</div>
+      <div class="chips" role="group" aria-labelledby="ft-l" id="fonts"></div>
+
+      <div class="f" id="st-l" style="font-weight:700;font-size:.95rem;margin:18px 0 8px">스티커</div>
+      <div class="chips" role="group" aria-labelledby="st-l" id="stickers"></div>
+
+      <div class="anon"><span aria-hidden="true">🔒</span><span>이 엽서에는 이름도, 이메일도, 작성 시각도 저장되지 않아요. 다만 글 속에 내 이름이나 다른 사람의 이름, 알아볼 수 있는 사건을 적으면 익명이 지켜지지 않을 수 있어요.</span></div>
+
+      <div class="send">
+        <button class="btn" id="send" disabled>엽서 붙이기</button>
+        <span class="status" id="status" role="status" aria-live="polite"></span>
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="preview-label">미리 보기</div>
+      <div class="preview" id="preview"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="w-h">
+    <div class="wall-head">
+      <div>
+        <h2 id="w-h">우리의 비밀 벽</h2>
+        <p id="wall-sub">엽서를 누르면 크게 볼 수 있어요.</p>
+      </div>
+      <div class="tools">
+        <button class="chip" id="shuffle">섞어 보기</button>
+        <button class="chip" id="slideshow">한 장씩 나눔하기</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer>
+    <p class="verse">“내가 주님께 거역한 나의 죄를 고백합니다” 하였더니, 주님께서는 나의 죄악을 기꺼이 용서하셨습니다.<small>시편 32:5 (새번역)</small></p>
+    <p>벽은 20초마다 새 엽서를 불러와요. 다른 사람의 엽서를 읽을 때는 판단하지 말고, “나도 그래요” 또는 “기도할게요”로 마음을 전해 주세요.</p>
+    <p class="help">혼자 감당하기 어려운 비밀이라면 믿을 만한 어른이나 목회자와 이야기해 주세요. 지금 많이 힘들다면 <strong>자살예방상담전화 109</strong>, <strong>청소년상담 1388</strong>에서 24시간 이야기를 들어 줍니다.</p>
+  </footer>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="엽서 크게 보기">
+  <div class="lb-count" id="lb-count"></div>
+  <div id="lb-card"></div>
+  <div class="lb-nav">
+    <button id="lb-prev">이전</button>
+    <button id="lb-close">닫기</button>
+    <button id="lb-next">다음</button>
+  </div>
+</div>
+
+<script>
+(function(){
+const BGS=[["kraft","#C9A87C","크라프트"],["night","#1d2b4a","밤하늘"],["lined","#fbf8f2","줄노트"],["sky","linear-gradient(160deg,#bfd9ea,#f4e3d3)","새벽"],["red","#B23A48","우체통"],["leaf","#5d7a5b","들풀"],["ink","#2a2f36","먹색"]];
+const FONTS=[["pen","손글씨"],["gaegu","개구쟁이"],["serif","바탕"],["block","굵게"]];
+const STK=["","🕯️","🕊️","🌱","❤️‍🩹","🌧️","☀️","✉️","🙏"];
+const MAX=180;
+const state={text:"",bg:"kraft",font:"pen",sticker:""};
+const $=id=>document.getElementById(id);
+
+// 서버(Apps Script) 호출을 Promise로
+function call(fn,...args){return new Promise((res,rej)=>{google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args)})}
+
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+let mine=lsGet("ps-mine",{}), reacted=lsGet("ps-reacted",{});
+
+function makeCard(d){
+  const c=document.createElement("div");
+  const bg=BGS.some(b=>b[0]===d.bg)?d.bg:"kraft";
+  const ft=FONTS.some(f=>f[0]===d.font)?d.font:"pen";
+  c.className="card bg-"+bg+" f-"+ft;
+  const t=document.createElement("div");t.className="txt";t.textContent=d.text;
+  const s=document.createElement("div");s.className="stk";s.textContent=STK.includes(d.sticker)?d.sticker:"";
+  c.append(t,s);return c;
+}
+function pressed(group,val){group.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===val))}
+BGS.forEach(([k,col,name])=>{const b=document.createElement("button");b.className="sw";b.style.background=col;b.dataset.v=k;b.title=name;b.setAttribute("aria-label",name);b.onclick=()=>{state.bg=k;pressed($("bgs"),k);render()};$("bgs").append(b)});
+FONTS.forEach(([k,name])=>{const b=document.createElement("button");b.className="chip";b.dataset.v=k;b.textContent=name;b.onclick=()=>{state.font=k;pressed($("fonts"),k);render()};$("fonts").append(b)});
+STK.forEach(e=>{const b=document.createElement("button");b.className="chip emo";b.dataset.v=e;b.textContent=e||"없음";if(!e)b.style.fontSize=".9rem";b.setAttribute("aria-label",e?"스티커 "+e:"스티커 없음");b.onclick=()=>{state.sticker=e;pressed($("stickers"),e);render()};$("stickers").append(b)});
+pressed($("bgs"),state.bg);pressed($("fonts"),state.font);pressed($("stickers"),state.sticker);
+
+let sending=false;
+function render(){
+  const p=$("preview");p.innerHTML="";
+  const c=makeCard({...state,text:state.text||"여기에 당신의 비밀이 적힙니다"});
+  if(!state.text)c.querySelector(".txt").classList.add("placeholder");
+  p.append(c);
+  $("cnt").textContent=state.text.length;
+  $("send").disabled=sending||!state.text.trim();
+}
+$("txt").addEventListener("input",e=>{state.text=e.target.value.slice(0,MAX);render()});
+render();
+function setStatus(msg,err){const s=$("status");s.textContent=msg;s.className="status"+(err?" err":"")}
+
+let docs=[], order=null, loaded=false;
+function when(date){
+  if(!date)return"";const d=(new Date().setHours(0,0,0,0)-new Date(date+"T00:00:00"))/864e5;
+  if(d<1)return"오늘";if(d<7)return"이번 주";if(d<31)return"이번 달";return"예전에";
+}
+function view(){return order?order.map(id=>docs.find(d=>d.id===id)).filter(Boolean):docs}
+function renderWall(){
+  const g=$("grid");g.innerHTML="";
+  const list=view();
+  $("wall-sub").textContent=list.length?`지금까지 ${list.length}장의 비밀이 붙어 있어요. 엽서를 누르면 크게 볼 수 있어요.`:"엽서를 누르면 크게 볼 수 있어요.";
+  if(!list.length){const e=document.createElement("div");e.className="empty";e.textContent=loaded?"아직 붙은 엽서가 없어요. 첫 번째 비밀을 붙여 주세요.":"벽을 불러오는 중이에요…";g.append(e);return}
+  list.forEach((d,i)=>{
+    const it=document.createElement("article");it.className="item";
+    const c=makeCard(d);
+    let h=0;for(const ch of d.id)h=(h*31+ch.charCodeAt(0))%997;
+    c.style.transform=`rotate(${(h%7-3)*0.6}deg)`;
+    c.tabIndex=0;c.setAttribute("role","button");c.setAttribute("aria-label","엽서 크게 보기");
+    c.onclick=()=>openLb(i);c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();openLb(i)}};
+    const m=document.createElement("div");m.className="meta";
+    const r=document.createElement("div");r.className="reacts";
+    [["metoo","나도 그래요","🤝"],["pray","기도할게요","🙏"]].forEach(([k,label,ic])=>{
+      const b=document.createElement("button");b.className="react";
+      b.setAttribute("aria-pressed",!!(reacted[d.id]&&reacted[d.id][k]));
+      b.textContent=`${ic} ${label} ${d[k]||0}`;b.onclick=()=>react(d,k);r.append(b);
+    });
+    const right=document.createElement("div");right.style.cssText="display:flex;align-items:center;gap:6px";
+    const t=document.createElement("span");t.textContent=when(d.date);right.append(t);
+    if(mine[d.id]){const del=document.createElement("button");del.className="link";del.textContent="내 엽서 떼기";del.onclick=()=>removeCard(d);right.append(del)}
+    m.append(r,right);it.append(c,m);g.append(it);
+  });
+}
+async function load(){
+  try{
+    docs=await call("getSecrets");loaded=true;
+    if(order)order=order.filter(id=>docs.some(d=>d.id===id)).concat(docs.filter(d=>!order.includes(d.id)).map(d=>d.id));
+    if(!$("lb").classList.contains("open"))renderWall();
+  }catch(e){loaded=true;$("grid").innerHTML='<div class="empty">벽을 불러오지 못했어요. 잠시 후 새로고침해 주세요.</div>'}
+}
+async function react(d,k){
+  const on=!!(reacted[d.id]&&reacted[d.id][k]);
+  reacted[d.id]=reacted[d.id]||{};reacted[d.id][k]=!on;lsSet("ps-reacted",reacted);
+  d[k]=Math.max(0,(d[k]||0)+(on?-1:1));renderWall();
+  try{d[k]=await call("react",d.id,k,on?-1:1);renderWall()}
+  catch(e){reacted[d.id][k]=on;lsSet("ps-reacted",reacted);setStatus("반응을 전하지 못했어요. 다시 눌러 주세요.",true);load()}
+}
+async function removeCard(d){
+  if(!confirm("이 엽서를 벽에서 뗄까요?"))return;
+  try{await call("removeSecret",d.id,mine[d.id]);delete mine[d.id];lsSet("ps-mine",mine);load()}
+  catch(e){setStatus("엽서를 떼지 못했어요.",true)}
+}
+$("send").onclick=async()=>{
+  const text=state.text.trim();if(!text)return;
+  sending=true;render();setStatus("붙이는 중…");
+  try{
+    const r=await call("addSecret",{text,bg:state.bg,font:state.font,sticker:state.sticker});
+    mine[r.id]=r.key;lsSet("ps-mine",mine);
+    state.text="";$("txt").value="";order=null;
+    setStatus("엽서를 붙였어요. 용기 내 줘서 고마워요.");
+    await load();
+    $("w-h").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+  }catch(e){setStatus("엽서를 붙이지 못했어요. 다시 시도해 주세요.",true)}
+  sending=false;render();
+};
+$("shuffle").onclick=()=>{const ids=docs.map(d=>d.id);for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}order=ids;renderWall()};
+
+let lbIdx=0;
+function showLb(){const list=view();if(!list.length)return;lbIdx=(lbIdx+list.length)%list.length;const h=$("lb-card");h.innerHTML="";h.append(makeCard(list[lbIdx]));$("lb-count").textContent=`${lbIdx+1} / ${list.length}`}
+function openLb(i){lbIdx=i;$("lb").classList.add("open");showLb();$("lb-close").focus()}
+function closeLb(){$("lb").classList.remove("open");renderWall()}
+$("slideshow").onclick=()=>{if(view().length)openLb(0)};
+$("lb-prev").onclick=()=>{lbIdx--;showLb()};$("lb-next").onclick=()=>{lbIdx++;showLb()};$("lb-close").onclick=closeLb;
+$("lb").addEventListener("click",e=>{if(e.target.id==="lb")closeLb()});
+document.addEventListener("keydown",e=>{if(!$("lb").classList.contains("open"))return;if(e.key==="Escape")closeLb();if(e.key==="ArrowRight"){lbIdx++;showLb()}if(e.key==="ArrowLeft"){lbIdx--;showLb()}});
+
+renderWall();load();
+setInterval(()=>{if(!document.hidden)load()},20000);
+})();
+
+</script>
+</body>
+</html>
